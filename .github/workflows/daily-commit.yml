@@ -4,343 +4,346 @@ name: 🚀 Daily Learning Commit
 on:
   schedule:
     # Runs every day at 9 PM WIB (14:00 UTC)
-    - cron: "0 14 * * *"
+    - cron: '0 14 * * *'
   workflow_dispatch: # Manual trigger button
 
 jobs:
   daily-commit:
     runs-on: ubuntu-latest
-
+    
     steps:
-      - name: 📥 Checkout repository
-        uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          fetch-depth: 0
+    - name: 📥 Checkout repository
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        fetch-depth: 0
+        
+    - name: 🎯 Generate daily learning content
+      run: |
+        # Setup timezone
+        export TZ='Asia/Jakarta'
+        
+        DATE=$(date +"%Y-%m-%d")
+        WEEK_DAY=$(date +"%A")
+        TIME=$(date +"%H:%M")
+        WEEK_NUMBER=$(date +"%U")
+        
+        # Create learning directory if not exists
+        mkdir -p learning-log
+        mkdir -p go-practice
+        
+        # Generate daily learning template
+        cat > "learning-log/$DATE.md" << EOF
+        # 📚 Learning Log - $DATE ($WEEK_DAY)
+        
+        ## 🎯 Today's Learning Goals
+        - [ ] Go practice (30 minutes minimum)
+        - [ ] Read Go documentation or articles
+        - [ ] Code review or work on project
+        - [ ] Update learning notes
+        
+        ## 💻 Go Code Focus Today
+        \`\`\`go
+        // Daily Go practice - Week $WEEK_NUMBER
+        package main
+        
+        import (
+            "fmt"
+            "time"
+        )
+        
+        func main() {
+            fmt.Printf("🚀 Learning Go - Day %s\\n", "$DATE")
+            fmt.Printf("⏰ Generated at: %s WIB\\n", "$TIME")
+            fmt.Println("💪 Consistency is the key to mastery!")
+        }
+        \`\`\`
+        
+        ## 📖 Today's Learning Focus
+        
+        ### Current Topic: 
+        - [ ] Add specific topic you're studying
+        
+        ### Key Concepts to Master:
+        - [ ] Concept 1
+        - [ ] Concept 2
+        - [ ] Concept 3
+        
+        ## 🌟 Progress Notes
+        - Current learning phase: Go Fundamentals
+        - Streak day: $(find learning-log -name "*.md" 2>/dev/null | wc -l)
+        - Weekly focus: Building strong foundations
+        
+        ## 🔗 Resources Found Today
+        - [ ] Add any useful links, articles, or documentation
+        
+        ## 💡 Insights & Reflections
+        - [ ] What did I learn today?
+        - [ ] What challenges did I face?
+        - [ ] What's my plan for tomorrow?
+        
+        ---
+        
+        **🤖 Auto-generated**: $DATE at $TIME WIB  
+        **📈 Learning Streak**: Keep the momentum going!
+        EOF
+        
+    - name: 🎲 Add motivational content
+      run: |
+        DATE=$(date +"%Y-%m-%d")
+        
+        # Array of Go-specific tips and quotes
+        declare -a tips=(
+          "💡 Go Tip: Use goroutines for concurrent programming - they're lightweight!"
+          "🔥 Remember: 'Don't communicate by sharing memory; share memory by communicating' - Go proverb"
+          "⚡ Go is designed for simplicity - embrace the explicit error handling!"
+          "🚀 Fact: Go compiles to a single binary - perfect for deployment!"
+          "💪 Practice: Write small programs daily to build muscle memory"
+          "🎯 Focus: Master one Go concept thoroughly before moving to the next"
+          "🌟 Tip: Read the Go standard library source code - it's educational!"
+          "🔧 Remember: go fmt is your friend - consistent code formatting matters"
+          "📚 Study: Effective Go is a must-read for every Go developer"
+          "⭐ Insight: Interfaces in Go are implicitly satisfied - powerful design!"
+        )
+        
+        declare -a quotes=(
+          "The only way to learn a new programming language is by writing programs in it. - Dennis Ritchie"
+          "Code is like humor. When you have to explain it, it's bad. - Cory House"  
+          "First, solve the problem. Then, write the code. - John Johnson"
+          "Experience is the name everyone gives to their mistakes. - Oscar Wilde"
+          "Simplicity is the ultimate sophistication. - Leonardo da Vinci"
+          "Learning never exhausts the mind. - Leonardo da Vinci"
+          "The expert in anything was once a beginner. - Helen Hayes"
+          "Don't comment bad code—rewrite it. - Brian Kernighan"
+        )
+        
+        # Select random tip and quote
+        TIP=${tips[$RANDOM % ${#tips[@]}]}
+        QUOTE=${quotes[$RANDOM % ${#quotes[@]}]}
+        
+        # Add to daily file
+        cat >> "learning-log/$DATE.md" << EOF
+        
+        ## 🎯 Go Tip of the Day
+        $TIP
+        
+        ## 💫 Inspiration
+        > $QUOTE
+        
+        ---
+        *Keep coding, keep learning! 🚀*
+        EOF
+        
+    - name: 📊 Update main README with progress
+      run: |
+        export TZ='Asia/Jakarta'
+        TOTAL_DAYS=$(find learning-log -name "*.md" 2>/dev/null | wc -l)
+        CURRENT_DATE=$(date +"%Y-%m-%d")
+        CURRENT_TIME=$(date +"%H:%M")
+        
+        # Calculate streak stats
+        WEEKS_ACTIVE=$((TOTAL_DAYS / 7))
+        DAYS_THIS_WEEK=$((TOTAL_DAYS % 7))
+        
+        # Get recent files for display
+        RECENT_FILES=$(ls -t learning-log/*.md 2>/dev/null | head -5 | sed 's|learning-log/||g' | sed 's|\.md||g' | while read file; do echo "- [$file](learning-log/$file.md)"; done)
+        
+        cat > README.md << EOF
+        # 🚀 Daily Learning Journey
+        
+        > **"Consistency beats perfection"** - Building expertise one day at a time!
+        
+        ## 📊 Current Stats
+        - 🔥 **Current Streak**: **$TOTAL_DAYS days**
+        - 📅 **Last Updated**: $CURRENT_DATE at $CURRENT_TIME WIB
+        - 🎯 **Focus**: Go Programming & Backend Development
+        - 📈 **Weekly Progress**: $WEEKS_ACTIVE weeks + $DAYS_THIS_WEEK days
+        
+        ## 🎓 Learning Progress
+        
+        ### 🐹 Go Learning Journey
+        \`\`\`
+        ██████████░░░░░░░░░░ 50% Go Fundamentals
+        ████░░░░░░░░░░░░░░░░ 20% Concurrency
+        ██░░░░░░░░░░░░░░░░░░ 10% Web Development  
+        ░░░░░░░░░░░░░░░░░░░░  0% Microservices
+        \`\`\`
+        
+        ### 📚 Learning Milestones
+        - [x] Environment Setup & Hello World
+        - [x] Basic Syntax & Data Types
+        - [x] Functions & Control Flow
+        - [ ] Structs & Methods (In Progress)
+        - [ ] Interfaces & Polymorphism
+        - [ ] Goroutines & Channels
+        - [ ] Web APIs with Gin/Echo
+        - [ ] Database Integration
+        - [ ] Testing & Benchmarking
+        - [ ] Deployment & Docker
+        
+        ## 📖 Recent Learning Logs
+        $RECENT_FILES
+        
+        ## 🎯 Current Goals
+        - ✅ Maintain daily learning habit (**$TOTAL_DAYS days strong!**)
+        - 🎯 Master Go fundamentals within 2 months
+        - 🚀 Build 3 Go projects for portfolio
+        - 💼 Apply for Go developer positions
+        - 🌟 Contribute to Go open source projects
+        
+        ## 📈 Learning Strategy
+        
+        ### Daily Routine
+        - 🌅 **Morning**: Review previous day's notes
+        - 💻 **Coding**: 30-60 minutes hands-on practice
+        - 📚 **Study**: Read Go docs or articles
+        - 🔄 **Reflect**: Update learning log
+        
+        ### Weekly Focus Areas
+        - **Week 1-2**: Go Syntax & Fundamentals
+        - **Week 3-4**: Structs, Methods & Interfaces  
+        - **Week 5-6**: Concurrency (Goroutines & Channels)
+        - **Week 7-8**: Web Development & APIs
+        
+        ## 🛠️ Tools & Resources
+        
+        ### Development Environment
+        - **Editor**: VS Code with Go extension
+        - **Version**: Go 1.21+
+        - **OS**: Development on multiple platforms
+        
+        ### Learning Resources
+        - 📖 [The Go Programming Language](https://golang.org/doc/)
+        - 🎯 [Go by Example](https://gobyexample.com/)
+        - 🏋️ [Exercism Go Track](https://exercism.io/tracks/go)
+        - 🎥 [YouTube Go Tutorials](https://youtube.com)
+        
+        ## 🏆 Achievements
+        
+        | Milestone | Status | Date |
+        |-----------|--------|------|
+        | First Go Program | ✅ | Day 1 |
+        | 7-Day Streak | ✅ | Day 7 |
+        | 30-Day Streak | 🎯 | Target |
+        | First Go Project | 🎯 | Target |
+        | 100-Day Streak | 🎯 | Target |
+        
+        ## 📞 Connect & Follow
+        
+        Follow my journey:
+        - 🐙 **GitHub**: [@mdwisu](https://github.com/mdwisu)
+        - 💼 **LinkedIn**: [Muhammad Dwi Susanto](https://linkedin.com/in/muhammad-dwi-susanto-684298201)
+        - 🌐 **Portfolio**: [mdwisu.vercel.app](https://mdwisu.vercel.app)
+        
+        ---
+        
+        ### 🤖 Automation Status
+        - **⚡ Status**: ✅ **ACTIVE**
+        - **🕘 Next Auto-Commit**: Tomorrow at 21:00 WIB
+        - **📊 Success Rate**: 100% uptime
+        - **🔄 Last Run**: $CURRENT_DATE at $CURRENT_TIME WIB
+        
+        > *"The journey of a thousand miles begins with one step"* - Keep learning! 🚀
+        
+        **🎯 Made with ❤️ and consistency by [@mdwisu](https://github.com/mdwisu)**
+        EOF
+        
+    - name: 📝 Create practice file
+      run: |
+        export TZ='Asia/Jakarta'
+        DATE=$(date +"%Y-%m-%d")
+        
+        # Create a simple Go practice file
+        cat > "go-practice/practice-$DATE.go" << EOF
+        // Daily Go Practice - $DATE
+        package main
+        
+        import (
+            "fmt"
+            "time"
+        )
+        
+        // DailyPractice represents today's learning session
+        type DailyPractice struct {
+            Date        string
+            Topic       string
+            Completed   bool
+            Notes       []string
+        }
+        
+        func main() {
+            practice := DailyPractice{
+                Date:      "$DATE",
+                Topic:     "Daily Go Practice",
+                Completed: false,
+                Notes:     []string{"Generated automatically", "Ready for learning"},
+            }
+            
+            fmt.Printf("📚 Go Practice Session: %s\\n", practice.Date)
+            fmt.Printf("🎯 Topic: %s\\n", practice.Topic)
+            fmt.Printf("⏰ Generated: %s\\n", time.Now().Format("15:04 MST"))
+            fmt.Println("🚀 Let's code something amazing today!")
+            
+            // TODO: Add your practice code here
+            practice.Completed = true
+            fmt.Printf("✅ Session Status: %v\\n", practice.Completed)
+        }
+        EOF
+        
+    - name: 🚀 Commit and push changes
+      env:
+        PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
+      run: |
+        # Configure git with your info (since using PAT)
+        git config --local user.email "dwisusanto784@gmail.com"
+        git config --local user.name "Muhammad Dwi Susanto"
+        
+        export TZ='Asia/Jakarta'
+        DATE=$(date +"%Y-%m-%d")
+        TIME=$(date +"%H:%M")
+        WEEKDAY=$(date +"%A")
+        TOTAL_DAYS=$(find learning-log -name "*.md" 2>/dev/null | wc -l)
+        
+        # Pull latest changes first to avoid conflicts
+        git pull origin main || true
+        
+        # Add all changes
+        git add .
+        
+        # Check if there are changes to commit
+        if git diff --staged --quiet; then
+          echo "No changes to commit today"
+          exit 0
+        fi
+        
+        # Create comprehensive commit message
+        git commit -m "📚 Daily Learning Update - $DATE ($WEEKDAY)
 
-      - name: 🎯 Generate daily learning content
-        run: |
-          # Setup timezone
-          export TZ='Asia/Jakarta'
-
-          DATE=$(date +"%Y-%m-%d")
-          WEEK_DAY=$(date +"%A")
-          TIME=$(date +"%H:%M")
-          WEEK_NUMBER=$(date +"%U")
-
-          # Create learning directory if not exists
-          mkdir -p learning-log
-          mkdir -p go-practice
-
-          # Generate daily learning template
-          cat > "learning-log/$DATE.md" << EOF
-          # 📚 Learning Log - $DATE ($WEEK_DAY)
-
-          ## 🎯 Today's Learning Goals
-          - [ ] Go practice (30 minutes minimum)
-          - [ ] Read Go documentation or articles
-          - [ ] Code review or work on project
-          - [ ] Update learning notes
-
-          ## 💻 Go Code Focus Today
-          \`\`\`go
-          // Daily Go practice - Week $WEEK_NUMBER
-          package main
-
-          import (
-              "fmt"
-              "time"
-          )
-
-          func main() {
-              fmt.Printf("🚀 Learning Go - Day %s\\n", "$DATE")
-              fmt.Printf("⏰ Generated at: %s WIB\\n", "$TIME")
-              fmt.Println("💪 Consistency is the key to mastery!")
-          }
-          \`\`\`
-
-          ## 📖 Today's Learning Focus
-
-          ### Current Topic: 
-          - [ ] Add specific topic you're studying
-
-          ### Key Concepts to Master:
-          - [ ] Concept 1
-          - [ ] Concept 2
-          - [ ] Concept 3
-
-          ## 🌟 Progress Notes
-          - Current learning phase: Go Fundamentals
-          - Streak day: $(find learning-log -name "*.md" 2>/dev/null | wc -l)
-          - Weekly focus: Building strong foundations
-
-          ## 🔗 Resources Found Today
-          - [ ] Add any useful links, articles, or documentation
-
-          ## 💡 Insights & Reflections
-          - [ ] What did I learn today?
-          - [ ] What challenges did I face?
-          - [ ] What's my plan for tomorrow?
-
-          ---
-
-          **🤖 Auto-generated**: $DATE at $TIME WIB  
-          **📈 Learning Streak**: Keep the momentum going!
-          EOF
-
-      - name: 🎲 Add motivational content
-        run: |
-          DATE=$(date +"%Y-%m-%d")
-
-          # Array of Go-specific tips and quotes
-          declare -a tips=(
-            "💡 Go Tip: Use goroutines for concurrent programming - they're lightweight!"
-            "🔥 Remember: 'Don't communicate by sharing memory; share memory by communicating' - Go proverb"
-            "⚡ Go is designed for simplicity - embrace the explicit error handling!"
-            "🚀 Fact: Go compiles to a single binary - perfect for deployment!"
-            "💪 Practice: Write small programs daily to build muscle memory"
-            "🎯 Focus: Master one Go concept thoroughly before moving to the next"
-            "🌟 Tip: Read the Go standard library source code - it's educational!"
-            "🔧 Remember: go fmt is your friend - consistent code formatting matters"
-            "📚 Study: Effective Go is a must-read for every Go developer"
-            "⭐ Insight: Interfaces in Go are implicitly satisfied - powerful design!"
-          )
-
-          declare -a quotes=(
-            "The only way to learn a new programming language is by writing programs in it. - Dennis Ritchie"
-            "Code is like humor. When you have to explain it, it's bad. - Cory House"  
-            "First, solve the problem. Then, write the code. - John Johnson"
-            "Experience is the name everyone gives to their mistakes. - Oscar Wilde"
-            "Simplicity is the ultimate sophistication. - Leonardo da Vinci"
-            "Learning never exhausts the mind. - Leonardo da Vinci"
-            "The expert in anything was once a beginner. - Helen Hayes"
-            "Don't comment bad code—rewrite it. - Brian Kernighan"
-          )
-
-          # Select random tip and quote
-          TIP=${tips[$RANDOM % ${#tips[@]}]}
-          QUOTE=${quotes[$RANDOM % ${#quotes[@]}]}
-
-          # Add to daily file
-          cat >> "learning-log/$DATE.md" << EOF
-
-          ## 🎯 Go Tip of the Day
-          $TIP
-
-          ## 💫 Inspiration
-          > $QUOTE
-
-          ---
-          *Keep coding, keep learning! 🚀*
-          EOF
-
-      - name: 📊 Update main README with progress
-        run: |
-          export TZ='Asia/Jakarta'
-          TOTAL_DAYS=$(find learning-log -name "*.md" 2>/dev/null | wc -l)
-          CURRENT_DATE=$(date +"%Y-%m-%d")
-          CURRENT_TIME=$(date +"%H:%M")
-
-          # Calculate streak stats
-          WEEKS_ACTIVE=$((TOTAL_DAYS / 7))
-          DAYS_THIS_WEEK=$((TOTAL_DAYS % 7))
-
-          # Get recent files for display
-          RECENT_FILES=$(ls -t learning-log/*.md 2>/dev/null | head -5 | sed 's|learning-log/||g' | sed 's|\.md||g' | while read file; do echo "- [$file](learning-log/$file.md)"; done)
-
-          cat > README.md << EOF
-          # 🚀 Daily Learning Journey
-
-          > **"Consistency beats perfection"** - Building expertise one day at a time!
-
-          ## 📊 Current Stats
-          - 🔥 **Current Streak**: **$TOTAL_DAYS days**
-          - 📅 **Last Updated**: $CURRENT_DATE at $CURRENT_TIME WIB
-          - 🎯 **Focus**: Go Programming & Backend Development
-          - 📈 **Weekly Progress**: $WEEKS_ACTIVE weeks + $DAYS_THIS_WEEK days
-
-          ## 🎓 Learning Progress
-
-          ### 🐹 Go Learning Journey
-          \`\`\`
-          ██████████░░░░░░░░░░ 50% Go Fundamentals
-          ████░░░░░░░░░░░░░░░░ 20% Concurrency
-          ██░░░░░░░░░░░░░░░░░░ 10% Web Development  
-          ░░░░░░░░░░░░░░░░░░░░  0% Microservices
-          \`\`\`
-
-          ### 📚 Learning Milestones
-          - [x] Environment Setup & Hello World
-          - [x] Basic Syntax & Data Types
-          - [x] Functions & Control Flow
-          - [ ] Structs & Methods (In Progress)
-          - [ ] Interfaces & Polymorphism
-          - [ ] Goroutines & Channels
-          - [ ] Web APIs with Gin/Echo
-          - [ ] Database Integration
-          - [ ] Testing & Benchmarking
-          - [ ] Deployment & Docker
-
-          ## 📖 Recent Learning Logs
-          $RECENT_FILES
-
-          ## 🎯 Current Goals
-          - ✅ Maintain daily learning habit (**$TOTAL_DAYS days strong!**)
-          - 🎯 Master Go fundamentals within 2 months
-          - 🚀 Build 3 Go projects for portfolio
-          - 💼 Apply for Go developer positions
-          - 🌟 Contribute to Go open source projects
-
-          ## 📈 Learning Strategy
-
-          ### Daily Routine
-          - 🌅 **Morning**: Review previous day's notes
-          - 💻 **Coding**: 30-60 minutes hands-on practice
-          - 📚 **Study**: Read Go docs or articles
-          - 🔄 **Reflect**: Update learning log
-
-          ### Weekly Focus Areas
-          - **Week 1-2**: Go Syntax & Fundamentals
-          - **Week 3-4**: Structs, Methods & Interfaces  
-          - **Week 5-6**: Concurrency (Goroutines & Channels)
-          - **Week 7-8**: Web Development & APIs
-
-          ## 🛠️ Tools & Resources
-
-          ### Development Environment
-          - **Editor**: VS Code with Go extension
-          - **Version**: Go 1.21+
-          - **OS**: Development on multiple platforms
-
-          ### Learning Resources
-          - 📖 [The Go Programming Language](https://golang.org/doc/)
-          - 🎯 [Go by Example](https://gobyexample.com/)
-          - 🏋️ [Exercism Go Track](https://exercism.io/tracks/go)
-          - 🎥 [YouTube Go Tutorials](https://youtube.com)
-
-          ## 🏆 Achievements
-
-          | Milestone | Status | Date |
-          |-----------|--------|------|
-          | First Go Program | ✅ | Day 1 |
-          | 7-Day Streak | ✅ | Day 7 |
-          | 30-Day Streak | 🎯 | Target |
-          | First Go Project | 🎯 | Target |
-          | 100-Day Streak | 🎯 | Target |
-
-          ## 📞 Connect & Follow
-
-          Follow my journey:
-          - 🐙 **GitHub**: [@mdwisu](https://github.com/mdwisu)
-          - 💼 **LinkedIn**: [Muhammad Dwi Susanto](https://linkedin.com/in/muhammad-dwi-susanto-684298201)
-          - 🌐 **Portfolio**: [mdwisu.vercel.app](https://mdwisu.vercel.app)
-
-          ---
-
-          ### 🤖 Automation Status
-          - **⚡ Status**: ✅ **ACTIVE**
-          - **🕘 Next Auto-Commit**: Tomorrow at 21:00 WIB
-          - **📊 Success Rate**: 100% uptime
-          - **🔄 Last Run**: $CURRENT_DATE at $CURRENT_TIME WIB
-
-          > *"The journey of a thousand miles begins with one step"* - Keep learning! 🚀
-
-          **🎯 Made with ❤️ and consistency by [@mdwisu](https://github.com/mdwisu)**
-          EOF
-
-      - name: 📝 Create practice file
-        run: |
-          export TZ='Asia/Jakarta'
-          DATE=$(date +"%Y-%m-%d")
-
-          # Create a simple Go practice file
-          cat > "go-practice/practice-$DATE.go" << EOF
-          // Daily Go Practice - $DATE
-          package main
-
-          import (
-              "fmt"
-              "time"
-          )
-
-          // DailyPractice represents today's learning session
-          type DailyPractice struct {
-              Date        string
-              Topic       string
-              Completed   bool
-              Notes       []string
-          }
-
-          func main() {
-              practice := DailyPractice{
-                  Date:      "$DATE",
-                  Topic:     "Daily Go Practice",
-                  Completed: false,
-                  Notes:     []string{"Generated automatically", "Ready for learning"},
-              }
-              
-              fmt.Printf("📚 Go Practice Session: %s\\n", practice.Date)
-              fmt.Printf("🎯 Topic: %s\\n", practice.Topic)
-              fmt.Printf("⏰ Generated: %s\\n", time.Now().Format("15:04 MST"))
-              fmt.Println("🚀 Let's code something amazing today!")
-              
-              // TODO: Add your practice code here
-              practice.Completed = true
-              fmt.Printf("✅ Session Status: %v\\n", practice.Completed)
-          }
-          EOF
-
-      - name: 🚀 Commit and push changes
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          # Configure git with GitHub Actions bot
-          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
-
-          export TZ='Asia/Jakarta'
-          DATE=$(date +"%Y-%m-%d")
-          TIME=$(date +"%H:%M")
-          WEEKDAY=$(date +"%A")
-          TOTAL_DAYS=$(find learning-log -name "*.md" 2>/dev/null | wc -l)
-
-          # Pull latest changes first to avoid conflicts
-          git pull origin main || true
-
-          # Add all changes
-          git add .
-
-          # Check if there are changes to commit
-          if git diff --staged --quiet; then
-            echo "No changes to commit today"
-            exit 0
+        🔥 Streak Day: $TOTAL_DAYS 
+        📖 Generated learning template for today
+        💻 Added Go practice file
+        📊 Updated progress statistics
+        ⏰ Auto-committed at $TIME WIB
+        
+        Learning Journey Continues! 🚀
+        
+        #DailyLearning #GoLang #Consistency #Automation" || exit 0
+        
+        # Push using PAT token
+        git remote set-url origin https://$PAT_TOKEN@github.com/${{ github.repository }}.git
+        
+        # Push changes with retry mechanism
+        for i in {1..3}; do
+          if git push origin main; then
+            echo "✅ Successfully pushed on attempt $i"
+            break
+          else
+            echo "❌ Push failed on attempt $i, retrying..."
+            git pull origin main --rebase || true
+            sleep 2
           fi
-
-          # Create comprehensive commit message
-          git commit -m "📚 Daily Learning Update - $DATE ($WEEKDAY)
-
-          🔥 Streak Day: $TOTAL_DAYS 
-          📖 Generated learning template for today
-          💻 Added Go practice file
-          📊 Updated progress statistics
-          ⏰ Auto-committed at $TIME WIB
-
-          Learning Journey Continues! 🚀
-
-          #DailyLearning #GoLang #Consistency #Automation" || exit 0
-
-          # Push changes with retry mechanism
-          for i in {1..3}; do
-            if git push origin main; then
-              echo "✅ Successfully pushed on attempt $i"
-              break
-            else
-              echo "❌ Push failed on attempt $i, retrying..."
-              git pull origin main --rebase || true
-              sleep 2
-            fi
-          done
-
-          echo "✅ Successfully committed daily learning update!"
-          echo "📊 Current streak: $TOTAL_DAYS days"
-          echo "🎯 Keep the momentum going!"
+        done
+        
+        echo "✅ Successfully committed daily learning update!"
+        echo "📊 Current streak: $TOTAL_DAYS days"
+        echo "🎯 Keep the momentum going!"
